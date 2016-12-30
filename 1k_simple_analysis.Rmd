@@ -1,0 +1,123 @@
+---
+title: "1k_simple_analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+```{r linraries}
+library(RSQLite)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(magrittr)
+library(knitr)
+library(DT)
+```
+
+```{r reading date}
+#reading users profiles
+con = dbConnect(SQLite(), dbname="data/music")
+users_1k = dbGetQuery( con,'SELECT * FROM user_prof_1k where usersha1 != \'#id\';' )
+
+#reading data 1k
+con2 = dbConnect(SQLite(), dbname="data/music")
+data_1k = dbGetQuery( con2,'SELECT * FROM data1k where mbtrid != "" ' )
+```
+
+```{r cleaning data}
+#cleaning data
+tracks <- data_1k %>% 
+  group_by(mbtrid,trname, artname) %>% 
+  summarise(plays = n()) %>% 
+  arrange(desc(plays)) %>% 
+  filter(plays > 20)
+
+barplot(tracks$plays)
+
+people <- data_1k %>% 
+  group_by(userid) %>% 
+  summarise(listens = n()) %>% 
+  arrange(listens) %>% 
+  filter(listens > 20)
+
+data_1k %<>% filter(mbtrid %in% tracks$mbtrid)
+data_1k %<>% filter(userid %in% people$userid)
+
+users_1k$gender %<>% as.factor()
+users_1k$age %<>% as.numeric() 
+```
+
+```{r fixing dates}
+#fixing dates
+mydate <- as.POSIXlt(strptime(data_1k$timestamp, format='%Y-%m-%dT%H:%M:%SZ'))
+data_1k$year <- as.factor(mydate$year+1900)
+data_1k$hour <- as.factor(mydate$hour)
+data_1k$month <- as.factor(mydate$mon+1)
+
+```
+
+```{r}
+#histogram year
+ggplot(data_1k, aes(x=year)) +
+  geom_histogram(stat="count")
+ggplotly()
+
+```
+
+
+```{r}
+#histogram hour
+ggplot(data_1k, aes(x=hour)) +
+  geom_histogram(stat="count")
+ggplotly()
+```
+
+```{r}
+#histogram month
+ggplot(data_1k, aes(x=month)) +
+  geom_histogram(stat="count")
+ggplotly()
+```
+
+```{r}
+# most played musics
+kable(tracks[1:20,])
+
+```
+
+```{r}
+# country with most users
+people <- merge(people, users_1k, by.x="userid", by.y = "usersha1")
+country <- people %>%
+            filter(country != "" & country != " " & country != "\t") %>% 
+            group_by(country) %>%
+            summarise(n = n()) %>% 
+            arrange(desc(n)) %>% 
+            datatable()
+```
+
+```{r}
+# genders
+gender <- users_1k %>%
+          group_by(gender) %>% 
+          summarise(n = n()) %>% 
+          arrange(desc(n)) %>% 
+          kable()
+ggplot(users_1k, aes(x=gender)) +
+  geom_histogram(stat="count")
+ggplotly()
+```
+
+```{r}
+#histogram of ages
+ggplot(filter(users_1k,!is.na(age)), aes(x=age)) +
+  geom_histogram(stat="count") + xlim(10,50)
+ggplotly()
+# count na ages
+table(is.na(users_1k$age))
+```
+
