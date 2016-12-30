@@ -5,7 +5,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(cache = TRUE)
 ```
 
 ```{r linraries}
@@ -24,8 +23,8 @@ con = dbConnect(SQLite(), dbname="data/music")
 users_1k = dbGetQuery( con,'SELECT * FROM user_prof_1k where usersha1 != \'#id\';' )
 
 #reading data 1k
-con2 = dbConnect(SQLite(), dbname="data/music")
-data_1k = dbGetQuery( con2,'SELECT * FROM data1k where mbtrid != "" ' )
+#con2 = dbConnect(SQLite(), dbname="data/music")
+data_1k = dbGetQuery( con,'SELECT * FROM data1k where mbtrid != "" ' )
 ```
 
 ```{r cleaning data}
