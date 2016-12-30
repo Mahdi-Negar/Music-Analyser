@@ -52,17 +52,17 @@ song_tag %>%
 
 
 ```{r song_tripplets}
-song_triplets = dbGetQuery(con, "select * from
-                      (select 
-                        songid, 
-                        sum(plays) as sum_plays, 
-                        avg(plays) as avg_plays,
-                        count(*) as count_plays
-                        from triplets 
-                        group by songid
-                      ) join songs
-                      on song_id=songid
-                      where count_plays > 10;")
+# song_triplets = dbGetQuery(con, "select * from
+#                       (select 
+#                         songid, 
+#                         sum(plays) as sum_plays, 
+#                         avg(plays) as avg_plays,
+#                         count(*) as count_plays
+#                         from triplets 
+#                         group by songid
+#                       ) join songs
+#                       on song_id=songid
+#                       where count_plays > 10;")
 ```
 
 ```{r}
@@ -73,8 +73,8 @@ song_tag %>%
   head(100) %>%
   datatable()
 
-fit = lm(duration ~ avg_plays + genre + artist_name, song_tag)
-plot(fit)
+# fit = lm(duration ~ avg_plays + genre + artist_name, song_tag)
+# plot(fit)
 
 ```
 
