@@ -1,0 +1,80 @@
+---
+title: "columbia_simple_analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+library("RSQLite")
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(magrittr)
+library(Matrix)
+library(data.table)
+library(tidyr)
+library(DT)
+con = dbConnect(SQLite(), dbname="data/track_metadata.db")
+```
+
+
+```{r song tag}
+song_tag = dbGetQuery(con, "select * from genre join 
+                      songs on tid=track_id join
+                      (select 
+                        songid, 
+                        sum(plays) as sum_plays, 
+                        avg(plays) as avg_plays,
+                        count(*) as count_plays
+                        from triplets 
+                        group by songid
+                      )
+                      on song_id=songid
+                      where count_plays > 10;")
+song_tag %<>%
+  select(title, artist_name, duration, sum_plays, avg_plays, count_plays, genre) %>%
+  arrange(desc(sum_plays))
+```
+```{r draw_dt_song_tag}
+song_tag %>% 
+  group_by(genre) %>% 
+  summarise(
+    count=n(), 
+    count_plays=sum(count_plays),
+    sum_plays=sum(sum_plays), 
+    avg_plays=sum_plays/count_plays, 
+    sumPerCount=sum_plays/count) %>%
+  filter(count_plays > 1000) %>%
+  arrange(desc(count)) %>%
+  datatable()
+```
+
+
+```{r song_tripplets}
+song_triplets = dbGetQuery(con, "select * from
+                      (select 
+                        songid, 
+                        sum(plays) as sum_plays, 
+                        avg(plays) as avg_plays,
+                        count(*) as count_plays
+                        from triplets 
+                        group by songid
+                      ) join songs
+                      on song_id=songid
+                      where count_plays > 10;")
+```
+
+```{r}
+hist(song_tag$avg_plays, breaks=500, xlim=c(1,10))
+hist(song_tag$sum_plays, breaks = 100000, xlim = c(1,1000))
+hist(song_tag$count_plays, breaks = 10000, xlim = c(1,500))
+song_tag %>%
+  head(100) %>%
+  datatable()
+
+fit = lm(duration ~ avg_plays + genre + artist_name, song_tag)
+plot(fit)
+
+```
+
