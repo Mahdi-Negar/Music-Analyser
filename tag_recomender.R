@@ -23,19 +23,30 @@ search_music <- function(song_name, artist_name){
   if(query == "")
     return (data.frame())
   print(query)
-  songs = dbGetQuery(con, paste0("select track_id, title, artist_name, duration, artist_familiarity  from songs where ", query, " order by artist_familiarity desc"))
+  songs = dbGetQuery(con, paste0("select track_id, title, artist_name, duration, artist_familiarity  from songs where ", query, " order by artist_familiarity desc limit 50"))
   data.frame(songs)
 }
 
 song_tag = dbGetQuery(con, "select * from pca_tag")
 
 
-relative_by_tag <- function(song_id, ret_size){
+relative_by_tag <- function(song_id, ret_size, include_this){
   query = dbGetQuery(con, paste0("select * from pca_tag where tid='", song_id, "'")) %>% 
     data.frame()
-  tids = simil(query[1,1:150], song_tag[,1:150], method="cosine") %>%
+  if(!include_this){
+    this_artist = dbGetQuery(con, 
+                             paste0("select track_id from songs where artist_id in (select artist_id from songs where track_id='",
+                                    song_id, "')"))
+    this_artist = this_artist$track_id %>% 
+      paste(collapse ="', '")
+    print(paste0("select * from pca_tag where tid not in ('", this_artist, "')"))
+    all_song = dbGetQuery(con, paste0("select * from pca_tag where tid not in ('", this_artist, "')"))
+  }else{
+    all_song = song_tag
+  }
+  tids = simil(query[1,1:150], all_song[,1:150], method="cosine") %>%
     rank()
-  tids = song_tag[which(tids > length(tids) - ret_size), 151] %>%
+  tids = all_song[which(tids > length(tids) - ret_size), 151] %>%
     paste(collapse = "', '")
   print(paste0("select * from genre join songs on genre.tid=track_id join msd_lastfm_tags on genre.tid==msd_lastfm_tags.tid where track_id in ('", tids,"')"))
   relative = dbGetQuery(con, paste0("select * from genre join songs on genre.tid=track_id join msd_lastfm_tags on genre.tid==msd_lastfm_tags.tid where track_id in ('", tids,"')"))
