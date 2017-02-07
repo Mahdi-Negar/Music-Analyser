@@ -13,7 +13,7 @@ source("../tag_recomender.R")
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   relativeByTag <- reactive({
-    relative_by_tag(input$songId, input$relativeSize)
+    relative_by_tag(input$songId, input$relativeSize, input$includeThis)
   })
   output$songNames <- renderTable({
     input$searchSong
