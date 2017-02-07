@@ -15,7 +15,9 @@ shinyUI(fluidPage(
   # Application title
   titlePanel("Music Recommender"),
   
-  # Sidebar with a slider input for number of bins 
+  # Sidebar with a slider input for number of bins
+  tabsetPanel(
+    tabPanel("Recommend by Tag",
   sidebarLayout(
     sidebarPanel(
        textInput("songName", label = h3("Song Name"), 
@@ -44,5 +46,24 @@ shinyUI(fluidPage(
       )
       # ,tags$head(tags$style("#recommendedSongs table {background-color: red; }", media="screen", type="text/css"))
     )
-  )
+  )),
+  tabPanel("Recommend By Users",
+           sidebarLayout(
+             sidebarPanel(
+               textInput("artistNameR", label = h3("Song Name"), 
+                         value = "Nightwish"),
+               actionButton('addArtist','Add'),
+               actionButton('resetArtist','Reset'),
+               sliderInput("artistSize", label = h3("Number of Output"),
+                           min = 1, max = 50, value = 20),
+               actionButton('recommendArtist','Recommend')
+             ),
+             mainPanel(
+               h3("Selected Artist"),
+               verbatimTextOutput('selectedArtist'),
+               h3("Recommended Artist"),
+               verbatimTextOutput('recommendedArtist')
+             )
+           )
+  ))
 ))
