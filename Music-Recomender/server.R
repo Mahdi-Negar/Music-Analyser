@@ -49,7 +49,6 @@ shinyServer(function(input, output) {
   })
   
   output$recommendedArtist <- renderPrint({
-    input$recommendArtist
     get_artist_recommended(selectedArtist$dList, input$artistSize)
   })
 })

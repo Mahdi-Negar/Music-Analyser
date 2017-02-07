@@ -55,8 +55,7 @@ shinyUI(fluidPage(
                actionButton('addArtist','Add'),
                actionButton('resetArtist','Reset'),
                sliderInput("artistSize", label = h3("Number of Output"),
-                           min = 1, max = 50, value = 20),
-               actionButton('recommendArtist','Recommend')
+                           min = 1, max = 50, value = 20)
              ),
              mainPanel(
                h3("Selected Artist"),
