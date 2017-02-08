@@ -9,6 +9,8 @@ library(plotly)
 library(magrittr)
 library(knitr)
 library(DT)
+library(grep)
+library(stringr)
 
 
 con_music = dbConnect(SQLite(), dbname="../data/music")
@@ -44,6 +46,15 @@ get_artist_name <- function(artistName){
   artists %>% filter(artname == artistName) %>% dim %>% .[1]
 }
 
+match_regx <- function(x, pattern){
+  m = gregexpr(pattern, x, perl = TRUE)
+  regmatches(x, m)
+}
+
+trim <- function(artistName){
+  trimmed <- match_regx(artistName, "(?<=\"\\{)(.*?)(?=\\}\")")
+  trimmed
+}
 get_artist_recommended <- function(artistList, out_length){
   capture.output(rules <- apriori(transactions, parameter = list(support = 0.001,confidence = 0.01, maxtime = 1000, minlen=2),
                   appearance = list(lhs = artistList, default="rhs"))) %>% invisible()
@@ -52,6 +63,7 @@ get_artist_recommended <- function(artistList, out_length){
     mutate(val = 30*confidence + lift) %>%
     arrange(desc(val))
   ret = as.character(rules[1:out_length, "rhs"])
+  lapply(ret, trim())
   ret
 }
 
