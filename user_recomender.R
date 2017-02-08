@@ -53,11 +53,11 @@ get_artist_recommended <- function(artistList, out_length){
                   appearance = list(lhs = artistList, default="rhs"))) %>% invisible()
   capture.output(rules <- rules %>% inspect() %>% data.frame()) %>% invisible()
   rules %<>% 
-    mutate(val = 30*confidence + lift) %>%
+    mutate(val = 30*confidence + lift, rhs=as.character(rhs)) %>%
     group_by(rhs) %>%
     summarise(val = mean(val)) %>%
     arrange(desc(val))
-  ret = as.character(rules[1:out_length, "rhs"])
+  ret = rules[1:out_length, "rhs"]
   ret = sapply(ret, trim) %>% as.vector()
   ret
 }
