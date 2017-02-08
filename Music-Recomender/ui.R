@@ -64,5 +64,22 @@ shinyUI(fluidPage(
                verbatimTextOutput('recommendedArtist')
              )
            )
+  ),  tabPanel("Recommend By Songs",
+               sidebarLayout(
+                 sidebarPanel(
+                   textInput("songIdR", label = h3("Song ID"), 
+                             value = "SOFRQTD12A81C233C0"),
+                   actionButton('addSongId','Add'),
+                   actionButton('resetSongId','Reset'),
+                   sliderInput("songIdSize", label = h3("Number of Output"),
+                               min = 1, max = 50, value = 20)
+                 ),
+                 mainPanel(
+                   h3("Selected Song ID"),
+                   verbatimTextOutput('selectedSongId'),
+                   h3("Recommended Song ID"),
+                   verbatimTextOutput('recommendedSongId')
+                 )
+               )
   ))
 ))

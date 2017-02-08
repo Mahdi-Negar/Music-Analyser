@@ -9,7 +9,6 @@ library(plotly)
 library(magrittr)
 library(knitr)
 library(DT)
-library(grep)
 library(stringr)
 
 
@@ -46,14 +45,8 @@ get_artist_name <- function(artistName){
   artists %>% filter(artname == artistName) %>% dim %>% .[1]
 }
 
-match_regx <- function(x, pattern){
-  m = gregexpr(pattern, x, perl = TRUE)
-  regmatches(x, m)
-}
-
-trim <- function(artistName){
-  trimmed <- match_regx(artistName, "(?<=\"\\{)(.*?)(?=\\}\")")
-  trimmed
+trim <- function(x){
+  substr(x, 2, str_length(x)-1)
 }
 get_artist_recommended <- function(artistList, out_length){
   capture.output(rules <- apriori(transactions, parameter = list(support = 0.001,confidence = 0.01, maxtime = 1000, minlen=2),
@@ -63,10 +56,9 @@ get_artist_recommended <- function(artistList, out_length){
     mutate(val = 30*confidence + lift) %>%
     arrange(desc(val))
   ret = as.character(rules[1:out_length, "rhs"])
-  lapply(ret, trim())
+  ret = sapply(ret, trim) %>% as.vector()
   ret
 }
-
 # inspect(rules[1:10])
 # inspect(sort(rules, by = "lift")[1:20])
 

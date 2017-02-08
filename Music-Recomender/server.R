@@ -10,6 +10,7 @@
 library(shiny)
 source("../tag_recomender.R")
 source("../user_recomender.R")
+# source("../music_recommender_by_user.R")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -50,5 +51,22 @@ shinyServer(function(input, output) {
   
   output$recommendedArtist <- renderPrint({
     get_artist_recommended(selectedArtist$dList, input$artistSize)
+  })
+  
+  #### song recommender
+  selectedSongId <- reactiveValues()
+  observeEvent(input$addSongId, {
+    if(get_song_id(input$songIdR) == 1)
+      selectedSongId$dList <- c(isolate(selectedSongId$dList), input$songIdR)
+  })
+  observeEvent(input$resetSongId, {
+    selectedSongId$dList <- c()
+  })
+  output$selectedSongId<-renderPrint({
+    selectedSongId$dList
+  })
+  
+  output$recommendedSongId <- renderPrint({
+    get_music_recommended(selectedSongId$dList, input$songIdSize)
   })
 })
