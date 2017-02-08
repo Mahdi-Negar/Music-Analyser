@@ -47,10 +47,10 @@ shinyUI(fluidPage(
       # ,tags$head(tags$style("#recommendedSongs table {background-color: red; }", media="screen", type="text/css"))
     )
   )),
-  tabPanel("Recommend By Users",
+  tabPanel("Recommend By Artists",
            sidebarLayout(
              sidebarPanel(
-               textInput("artistNameR", label = h3("Song Name"), 
+               textInput("artistNameR", label = h3("Artist Name"), 
                          value = "Nightwish"),
                actionButton('addArtist','Add'),
                actionButton('resetArtist','Reset'),

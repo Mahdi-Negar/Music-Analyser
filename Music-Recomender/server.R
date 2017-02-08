@@ -35,7 +35,7 @@ shinyServer(function(input, output) {
   })
   
   
-  #### user recommender
+  #### artist recommender
   selectedArtist <- reactiveValues()
   observeEvent(input$addArtist, {
     if(get_artist_name(tolower(input$artistNameR)) == 1)
