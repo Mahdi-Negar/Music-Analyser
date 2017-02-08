@@ -55,7 +55,7 @@ get_artist_recommended <- function(artistList, out_length){
   rules %<>% 
     mutate(val = 30*confidence + lift) %>%
     group_by(rhs) %>%
-    summarise(val = avg(val)) %>%
+    summarise(val = mean(val)) %>%
     arrange(desc(val))
   ret = as.character(rules[1:out_length, "rhs"])
   ret = sapply(ret, trim) %>% as.vector()
